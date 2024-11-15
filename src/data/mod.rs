@@ -47,6 +47,16 @@ pub mod crypto {
             const DOMAIN: &'static str = crate::data::DOMAIN;
             const ENDPOINT: &'static str = "/v1beta3/crypto/us/latest/orderbooks";
             type Response = Response;
+            fn uri(&self) -> String {
+                let mut uri = format!("{}{}", Self::DOMAIN, Self::ENDPOINT);
+                if self.symbols.is_empty() { return uri; }
+                uri.push_str("?");
+                uri.push_str(&self.symbols.iter().fold(String::new(), |acc, symbol| {
+                    format!("{}{}&", acc, symbol)
+                }));
+                uri
+            }
+            /*
             fn params_string(&self) -> String {
                 let mut params = self.symbols.iter().fold(String::new(), |acc, symbol| {
                     format!("{}{},", acc, symbol)
@@ -56,6 +66,7 @@ pub mod crypto {
                 }
                 format!("?symbols={}", params)
             }
+            */
         }
     }
 }

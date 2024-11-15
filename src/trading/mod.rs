@@ -288,7 +288,6 @@ pub mod assets {
         }
     }
 
-    use serde_with::rust::deserialize_ignore_any;
     #[serde_with::serde_as]
     #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
     pub enum Atrributes {
@@ -408,13 +407,8 @@ pub mod assets {
             const DOMAIN: &'static str = crate::trading::DOMAIN;
             const ENDPOINT: &'static str = "/assets";
             type Response = Vec<super::Asset>;
-            fn params_string(&self) -> String {
-                let params = String::new();
-                if !params.is_empty() {
-                    format!("?{}", params)
-                } else {
-                    params
-                }
+            fn uri(&self) -> String {
+                format!("{}/{}", Self::DOMAIN, Self::ENDPOINT)
             }
         }
     }
@@ -433,8 +427,8 @@ pub mod assets {
             const DOMAIN: &'static str = crate::trading::DOMAIN;
             const ENDPOINT: &'static str = "/assets";
             type Response = super::Asset;
-            fn params_string(&self) -> String {
-                format!("/{}", self.id)
+            fn uri(&self) -> String {
+                format!("{}/{}/{}", Self::DOMAIN, Self::ENDPOINT, self.id)
             }
         }
     }
@@ -588,6 +582,9 @@ pub mod orders {
             const DOMAIN: &'static str = crate::trading::DOMAIN;
             type Response = Response;
             const ENDPOINT: &'static str = "/orders";
+            fn uri(&self) -> String {
+                format!("{}/{}", Self::DOMAIN, Self::ENDPOINT)
+            }
         }
     }
     pub mod get_orders {
@@ -642,41 +639,35 @@ pub mod orders {
             const DOMAIN: &'static str = crate::trading::DOMAIN;
             const ENDPOINT: &'static str = "/orders";
             type Response = Vec<super::Order>;
-            fn params_string(&self) -> String {
-                let mut params = String::new();
+            fn uri(&self) -> String {
+                let mut uri = format!("{}/{}", Self::DOMAIN, Self::ENDPOINT);
                 if let Some(status) = self.status {
-                    params.push_str(&format!("status={}&", status));
+                    uri = format!("{}?status={}", uri, status);
                 }
                 if let Some(limit) = self.limit {
-                    params.push_str(&format!("limit={}&", limit));
+                    uri = format!("{}&limit={}", uri, limit);
                 }
                 if let Some(after) = self.after {
-                    params.push_str(&format!("after={}&", after));
+                    uri = format!("{}&after={}", uri, after);
                 }
                 if let Some(until) = self.until {
-                    params.push_str(&format!("until={}&", until));
+                    uri = format!("{}&until={}", uri, until);
                 }
                 if let Some(direction) = self.direction {
-                    params.push_str(&format!("direction={}&", direction));
+                    uri = format!("{}&direction={}", uri, direction);
                 }
                 if let Some(nested) = self.nested {
-                    params.push_str(&format!("nested={}&", nested));
+                    uri = format!("{}&nested={}", uri, nested);
                 }
                 if let Some(symbols) = &self.symbols {
-                    params.push_str(&format!("symbols={}&", symbols));
+                    uri = format!("{}&symbols={}", uri, symbols);
                 }
                 if let Some(side) = self.side {
-                    params.push_str(&format!("side={}&", side));
+                    uri = format!("{}&side={}", uri, side);
                 }
-                if params.ends_with('&') {
-                    params.pop();
-                }
-                if !params.is_empty() {
-                    format!("?{}", params)
-                } else {
-                    params
-                }
+                uri
             }
+            
         }
     }
 }
