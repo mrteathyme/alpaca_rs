@@ -293,7 +293,7 @@ impl Order {
             const ENDPOINT: &'static str = "/v2/orders";
             type Response = Vec<Order>;
             fn uri(&self) -> String {
-                format!("{}{}?{}", Self::DOMAIN, Self::ENDPOINT, self.status)
+                format!("{}{}?status={}", Self::DOMAIN, Self::ENDPOINT, self.status)
             }
         }
         Ok(Request { status: status.to_string() }.as_request(key,secret)?)
