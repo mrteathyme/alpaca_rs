@@ -1,4 +1,4 @@
-use crate::{IntoGetRequest, IntoPostRequest, IntoPatchRequest, IntoDeleteRequest};
+use crate::{AlpacaRequest, IntoDeleteRequest, IntoGetRequest, IntoPatchRequest, IntoPostRequest};
 #[derive(Copy, Clone, Debug)]
 pub enum ExtendedHours {
     True,
@@ -266,7 +266,7 @@ impl OrderBuilder {
 }
 
 impl Order {
-    pub fn get_order(key: &str, secret: &str, id: uuid::Uuid) -> Result<http::Request<String>, Box<dyn std::error::Error>> {
+    pub fn get_order(key: &str, secret: &str, id: uuid::Uuid) -> Result<AlpacaRequest<Order>, Box<dyn std::error::Error>> {
         #[derive(serde::Serialize)]
         struct Request {
             id: uuid::Uuid,
@@ -279,9 +279,9 @@ impl Order {
                 format!("{}{}/{}", Self::DOMAIN, Self::ENDPOINT, self.id)
             }
         }
-        Request { id }.as_get_request(key, secret)
+        Ok(Request { id }.as_request(key, secret)?)
     }
-    pub fn get_orders(key: &str, secret: &str, ) -> Result<http::Request<String>, Box<dyn std::error::Error>> {
+    pub fn get_orders(key: &str, secret: &str, ) -> Result<AlpacaRequest<Vec<Order>>, Box<dyn std::error::Error>> {
         #[derive(serde::Serialize)]
         struct Request;
         impl crate::IntoGetRequest for Request {
@@ -292,9 +292,9 @@ impl Order {
                 format!("{}{}", Self::DOMAIN, Self::ENDPOINT)
             }
         }
-        Request.as_get_request(key, secret)
+        Ok(Request.as_request(key,secret)?)
     }
-    pub fn create_order(&self, key: &str, secret: &str) -> Result<http::Request<String>, Box<dyn std::error::Error>> {
+    pub fn create_order(&self, key: &str, secret: &str) -> Result<AlpacaRequest<Order>, Box<dyn std::error::Error>> {
         #[derive(serde::Serialize)]
         struct Request {
             symbol: String,
@@ -321,7 +321,7 @@ impl Order {
                 format!("{}{}", Self::DOMAIN, Self::ENDPOINT)
             }
         }
-        Request {
+        Ok(Request {
             symbol: self.symbol.clone(),
             side: self.side,
             order_type: self.order_type,
@@ -336,9 +336,9 @@ impl Order {
             client_order_id: self.client_order_id,
             order_class: self.order_class,
             position_intent: self.position_intent
-        }.as_post_request(key, secret)
+        }.as_request(key,secret)?)
     }
-    pub fn replace_order(&self, key: &str, secret: &str, id: uuid::Uuid) -> Result<http::Request<String>, Box<dyn std::error::Error>> {
+    pub fn replace_order(&self, key: &str, secret: &str, id: uuid::Uuid) -> Result<AlpacaRequest<Order>, Box<dyn std::error::Error>> {
         #[derive(serde::Serialize)]
         struct Request {
         id: uuid::Uuid,
@@ -362,7 +362,7 @@ impl Order {
                 format!("{}{}/{}", Self::DOMAIN, Self::ENDPOINT, self.id)
             }
         }
-        Request {
+        Ok(Request {
         id,
         qty: self.qty,
         notional: self.notional,
@@ -375,9 +375,9 @@ impl Order {
         client_order_id: self.client_order_id,
         order_class: self.order_class,
         position_intent: self.position_intent
-        }.as_patch_request(key, secret)
+        }.as_request(key,secret)?)
     }
-    pub fn cancel_order(key: &str, secret: &str, id: uuid::Uuid) -> Result<http::Request<String>, Box<dyn std::error::Error>> {
+    pub fn cancel_order(key: &str, secret: &str, id: uuid::Uuid) -> Result<AlpacaRequest<Order>, Box<dyn std::error::Error>> {
         #[derive(serde::Serialize)]
         struct Request {
         id: uuid::Uuid,
@@ -390,19 +390,19 @@ impl Order {
                 format!("{}{}/{}", Self::DOMAIN, Self::ENDPOINT, self.id)
             }
         }
-        Request { id }.as_delete_request(key, secret)
+        Ok(Request { id }.as_request(key,secret)?)
     }
-    pub fn cancel_orders(key: &str, secret: &str) -> Result<http::Request<String>, Box<dyn std::error::Error>> {
+    pub fn cancel_orders(key: &str, secret: &str) -> Result<crate::AlpacaRequest<()>, Box<dyn std::error::Error>> {
         #[derive(serde::Serialize)]
         struct Request;
         impl crate::IntoDeleteRequest for Request {
         const DOMAIN: &'static str = crate::trading::DOMAIN;
         const ENDPOINT: &'static str = "/v2/orders";
-        type Response = Order;
+        type Response = ();
             fn uri(&self) -> String {
                 format!("{}{}", Self::DOMAIN, Self::ENDPOINT)
             }
         }
-        Request.as_delete_request(key, secret)
+        Ok(Request.as_request(key, secret)?)
     }
 }

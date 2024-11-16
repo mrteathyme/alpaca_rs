@@ -1,9 +1,21 @@
+#![feature(unsized_const_params)]
 pub mod broker;
 pub mod data;
 pub mod trading;
 
+struct AlpacaRequest<T: for<'a> serde::Deserialize<'a>>(http::Request<String>,std::marker::PhantomData<T>);
 
-pub trait IntoPostRequest: serde::Serialize {
+impl<T: for<'a> serde::Deserialize<'a>> AlpacaRequest<T> {
+    fn new(req: http::Request<String>) -> Self {
+        Self(req,std::marker::PhantomData)
+    }
+    async fn send<F, R>(self, func: F) -> Result<T, Box<dyn std::error::Error>>
+    where F: Fn(http::Request<String>) -> R,
+        R: std::future::Future<Output = Result<bytes::Bytes, Box<dyn std::error::Error>>>,
+    { Ok(serde_json::from_slice(&func(self.0).await?)?) }
+}
+
+trait IntoPostRequest: serde::Serialize {
     const DOMAIN: &'static str;
     const ENDPOINT: &'static str;
     type Response: for<'a> serde::Deserialize<'a>;
@@ -20,9 +32,16 @@ pub trait IntoPostRequest: serde::Serialize {
             .uri(self.uri())
             .body(serde_json::to_string(self)?)?)
     }
+    fn as_request(
+        &self,
+        key: &str,
+        secret: &str,
+    ) -> Result<AlpacaRequest<Self::Response>, Box<dyn std::error::Error>> {
+        Ok(AlpacaRequest::new(self.as_post_request(key, secret)?))
+    }
 }
 
-pub trait IntoGetRequest: serde::Serialize {
+trait IntoGetRequest: serde::Serialize {
     const DOMAIN: &'static str;
     const ENDPOINT: &'static str;
     type Response: for<'a> serde::Deserialize<'a>;
@@ -39,9 +58,16 @@ pub trait IntoGetRequest: serde::Serialize {
             .uri(self.uri())
             .body(String::new())?)
     }
+    fn as_request(
+        &self,
+        key: &str,
+        secret: &str,
+    ) -> Result<AlpacaRequest<Self::Response>, Box<dyn std::error::Error>> {
+        Ok(AlpacaRequest::new(self.as_get_request(key, secret)?))
+    }
 }
 
-pub trait IntoDeleteRequest: serde::Serialize {
+trait IntoDeleteRequest: serde::Serialize {
     const DOMAIN: &'static str;
     const ENDPOINT: &'static str;
     type Response: for<'a> serde::Deserialize<'a>;
@@ -58,9 +84,16 @@ pub trait IntoDeleteRequest: serde::Serialize {
             .uri(self.uri())
             .body(String::new())?)
     }
+    fn as_request(
+        &self,
+        key: &str,
+        secret: &str,
+    ) -> Result<AlpacaRequest<Self::Response>, Box<dyn std::error::Error>> {
+        Ok(AlpacaRequest::new(self.as_delete_request(key, secret)?))
+    }
 }
 
-pub trait IntoPatchRequest: serde::Serialize {
+trait IntoPatchRequest: serde::Serialize {
     const DOMAIN: &'static str;
     const ENDPOINT: &'static str;
     type Response: for<'a> serde::Deserialize<'a>;
@@ -76,5 +109,12 @@ pub trait IntoPatchRequest: serde::Serialize {
             .header("APCA-API-SECRET-KEY", secret)
             .uri(self.uri())
             .body(serde_json::to_string(self)?)?)
+    }
+    fn as_request(
+        &self,
+        key: &str,
+        secret: &str,
+    ) -> Result<AlpacaRequest<Self::Response>, Box<dyn std::error::Error>> {
+        Ok(AlpacaRequest::new(self.as_patch_request(key, secret)?))
     }
 }
