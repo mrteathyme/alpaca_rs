@@ -3,6 +3,12 @@ pub mod broker;
 pub mod data;
 pub mod trading;
 
+#[derive(serde::Deserialize)]
+pub enum AlpacaResponse<T> {
+    Ok(T),
+    Err(serde_json::Value)
+}
+
 pub struct AlpacaRequest<T: for<'a> serde::Deserialize<'a>>(http::Request<String>,std::marker::PhantomData<T>);
 
 impl<T: for<'a> serde::Deserialize<'a>> AlpacaRequest<T> {
@@ -12,7 +18,13 @@ impl<T: for<'a> serde::Deserialize<'a>> AlpacaRequest<T> {
     pub async fn send<F, R>(self, func: F) -> Result<T, Box<dyn std::error::Error>>
     where F: Fn(http::Request<String>) -> R,
         R: std::future::Future<Output = Result<bytes::Bytes, Box<dyn std::error::Error>>>,
-    { Ok(serde_json::from_slice(&func(self.0).await?)?) }
+    { 
+        let response: AlpacaResponse<T> = serde_json::from_slice(&func(self.0).await?)?;
+        match response {
+            AlpacaResponse::Ok(data) => Ok(data),
+            AlpacaResponse::Err(err) => Err(serde_json::to_string(&err)?.into())
+        }
+    }
 }
 
 trait IntoPostRequest: serde::Serialize {
