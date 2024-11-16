@@ -4,6 +4,7 @@ pub mod data;
 pub mod trading;
 
 #[derive(serde::Deserialize)]
+#[serde(untagged)]
 pub enum AlpacaResponse<T> {
     Ok(T),
     Err(serde_json::Value)
