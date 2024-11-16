@@ -1,4 +1,4 @@
-const DOMAIN: &str = "https://api.alpaca.markets/v2";
+const DOMAIN: &str = "https://api.alpaca.markets";
 pub mod orders;
 
 #[derive(serde::Serialize, serde::Deserialize, Copy, Clone, Debug)]
