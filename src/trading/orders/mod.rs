@@ -144,9 +144,8 @@ pub enum Side {
 #[derive(derive_builder::Builder,serde::Serialize, serde::Deserialize, Clone, Debug)]
 #[builder(build_fn(validate = "Self::validate"))]
 pub struct Order {
-    #[builder(setter(into, strip_option))]
+    #[builder(setter(skip))]
     pub id: Option<uuid::Uuid>,
-
     #[builder(setter(into, strip_option))]
     pub client_order_id: Option<uuid::Uuid>,
     #[builder(setter(skip))]
@@ -165,7 +164,7 @@ pub struct Order {
     pub replaced_at: Option<chrono::DateTime<chrono::Utc>>,
     #[builder(setter(skip))]
     pub replaced_by: Option<String>,
-    #[builder(setter(into, strip_option))]
+    #[builder(setter(skip))]
     pub replaces: Option<String>,
     #[builder(setter(skip))]
     pub asset_id: Option<String>,
