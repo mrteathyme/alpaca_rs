@@ -167,7 +167,9 @@ pub struct Order {
     pub replaced_by: Option<String>,
     #[builder(setter(into, strip_option))]
     pub replaces: Option<String>,
-    pub asset_id: String,
+    #[builder(setter(skip))]
+    pub asset_id: Option<String>,
+    #[builder(setter(into))]
     pub symbol: String,
     #[builder(setter(into, strip_option))]
     pub asset_class: Option<AssetClass>,
