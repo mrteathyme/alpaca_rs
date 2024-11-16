@@ -1,3 +1,5 @@
+use http::status;
+
 use crate::{AlpacaRequest, IntoDeleteRequest, IntoGetRequest, IntoPatchRequest, IntoPostRequest};
 #[derive(Copy, Clone, Debug)]
 pub enum ExtendedHours {
@@ -281,18 +283,20 @@ impl Order {
         }
         Ok(Request { id }.as_request(key, secret)?)
     }
-    pub fn get_orders(key: &str, secret: &str, ) -> Result<AlpacaRequest<Vec<Order>>, Box<dyn std::error::Error>> {
+    pub fn get_orders(key: &str, secret: &str,status: &str) -> Result<AlpacaRequest<Vec<Order>>, Box<dyn std::error::Error>> {
         #[derive(serde::Serialize)]
-        struct Request;
+        struct Request {
+            status: String,
+        }
         impl crate::IntoGetRequest for Request {
             const DOMAIN: &'static str = crate::trading::DOMAIN;
             const ENDPOINT: &'static str = "/v2/orders";
             type Response = Vec<Order>;
             fn uri(&self) -> String {
-                format!("{}{}", Self::DOMAIN, Self::ENDPOINT)
+                format!("{}{}?{}", Self::DOMAIN, Self::ENDPOINT, self.status)
             }
         }
-        Ok(Request.as_request(key,secret)?)
+        Ok(Request { status: status.to_string() }.as_request(key,secret)?)
     }
     pub fn create_order(&self, key: &str, secret: &str) -> Result<AlpacaRequest<Order>, Box<dyn std::error::Error>> {
         #[derive(serde::Serialize)]
