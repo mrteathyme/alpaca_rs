@@ -3,13 +3,13 @@ pub mod broker;
 pub mod data;
 pub mod trading;
 
-struct AlpacaRequest<T: for<'a> serde::Deserialize<'a>>(http::Request<String>,std::marker::PhantomData<T>);
+pub struct AlpacaRequest<T: for<'a> serde::Deserialize<'a>>(http::Request<String>,std::marker::PhantomData<T>);
 
 impl<T: for<'a> serde::Deserialize<'a>> AlpacaRequest<T> {
     fn new(req: http::Request<String>) -> Self {
         Self(req,std::marker::PhantomData)
     }
-    async fn send<F, R>(self, func: F) -> Result<T, Box<dyn std::error::Error>>
+    pub async fn send<F, R>(self, func: F) -> Result<T, Box<dyn std::error::Error>>
     where F: Fn(http::Request<String>) -> R,
         R: std::future::Future<Output = Result<bytes::Bytes, Box<dyn std::error::Error>>>,
     { Ok(serde_json::from_slice(&func(self.0).await?)?) }
