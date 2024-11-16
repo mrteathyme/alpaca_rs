@@ -144,9 +144,10 @@ pub enum Side {
 #[derive(derive_builder::Builder,serde::Serialize, serde::Deserialize, Clone, Debug)]
 #[builder(build_fn(validate = "Self::validate"))]
 pub struct Order {
-    #[builder(setter(skip))]
+    #[builder(setter(into, strip_option),default)]
     pub id: Option<uuid::Uuid>,
-    #[builder(setter(into, strip_option))]
+
+    #[builder(setter(into, strip_option),default)]
     pub client_order_id: Option<uuid::Uuid>,
     #[builder(setter(skip))]
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,
@@ -164,21 +165,21 @@ pub struct Order {
     pub replaced_at: Option<chrono::DateTime<chrono::Utc>>,
     #[builder(setter(skip))]
     pub replaced_by: Option<String>,
-    #[builder(setter(skip))]
+    #[builder(setter(into, strip_option),default)]
     pub replaces: Option<String>,
     #[builder(setter(skip))]
     pub asset_id: Option<String>,
     #[builder(setter(into))]
     pub symbol: String,
-    #[builder(setter(into, strip_option))]
+    #[builder(setter(into, strip_option),default)]
     pub asset_class: Option<AssetClass>,
     
     #[serde_as(as = "Option<serde_with::DisplayFromStr>")]
-    #[builder(setter(into, strip_option))]
+    #[builder(setter(into, strip_option),default)]
     pub notional: Option<f64>,
     
     #[serde_as(as = "Option<serde_with::DisplayFromStr>")]
-    #[builder(setter(into, strip_option))]
+    #[builder(setter(into, strip_option),default)]
     pub qty: Option<f64>,
     
     #[serde_as(as = "Option<serde_with::DisplayFromStr>")]
@@ -188,38 +189,38 @@ pub struct Order {
     #[serde_as(as = "Option<serde_with::DisplayFromStr>")]
     #[builder(setter(skip))]
     pub filled_avg_price: Option<f64>,
-    #[builder(setter(into, strip_option))]
+    #[builder(setter(into, strip_option),default)]
     pub order_class: Option<OrderClass>,
     #[serde(rename = "type")]
-    #[builder(setter(into, strip_option))]
+    #[builder(setter(into, strip_option),default)]
     pub order_type: OrderType,
     pub side: Side,
     pub time_in_force: TimeInForce,
     
     #[serde_as(as = "Option<serde_with::DisplayFromStr>")]
-    #[builder(setter(into, strip_option))]
+    #[builder(setter(into, strip_option),default)]
     pub limit_price: Option<f64>,
     
     #[serde_as(as = "Option<serde_with::DisplayFromStr>")]
-    #[builder(setter(into, strip_option))]
+    #[builder(setter(into, strip_option),default)]
     pub stop_price: Option<f64>,
-    #[builder(setter(into, strip_option))]
+    #[builder(setter(into, strip_option),default)]
     pub status: Option<OrderStatus>,
-    #[builder(setter(into, strip_option))]
+    #[builder(setter(into, strip_option),default)]
     pub extended_hours: Option<ExtendedHours>,
-    #[builder(setter(into, strip_option))]
+    #[builder(setter(into, strip_option),default)]
     pub legs: Option<Vec<Order>>,
     
     #[serde_as(as = "Option<serde_with::DisplayFromStr>")]
-    #[builder(setter(into, strip_option))]
+    #[builder(setter(into, strip_option),default)]
     pub trail_percent: Option<f64>,
     #[serde_as(as = "Option<serde_with::DisplayFromStr>")]
-    #[builder(setter(into, strip_option))]
+    #[builder(setter(into, strip_option),default)]
     pub trail_price: Option<f64>,
     #[serde_as(as = "Option<serde_with::DisplayFromStr>")]
-    #[builder(setter(into, strip_option))]
+    #[builder(setter(into, strip_option),default)]
     pub hwm: Option<f64>,
-    #[builder(setter(into, strip_option))]
+    #[builder(setter(into, strip_option),default)]
     pub position_intent: Option<PositionIntent>,
 }
 
