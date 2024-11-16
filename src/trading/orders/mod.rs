@@ -192,7 +192,6 @@ pub struct Order {
     #[builder(setter(into, strip_option),default)]
     pub order_class: Option<OrderClass>,
     #[serde(rename = "type")]
-    #[builder(setter(into, strip_option),default)]
     pub order_type: OrderType,
     pub side: Side,
     pub time_in_force: TimeInForce,
