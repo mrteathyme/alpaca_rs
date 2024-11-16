@@ -387,11 +387,11 @@ impl Order {
         id: uuid::Uuid,
         }
         impl crate::IntoDeleteRequest for Request {
-        const DOMAIN: &'static str = crate::trading::DOMAIN;
-        const ENDPOINT: &'static str = "/v2/orders";
-        type Response = Order;
+            const DOMAIN: &'static str = crate::trading::DOMAIN;
+            const ENDPOINT: &'static str = "/v2/orders";
+            type Response = Order;
             fn uri(&self) -> String {
-                format!("{}{}/{}", Self::DOMAIN, Self::ENDPOINT, self.id)
+                    format!("{}{}/{}", Self::DOMAIN, Self::ENDPOINT, self.id)
             }
         }
         Ok(Request { id }.as_request(key,secret)?)
@@ -400,9 +400,9 @@ impl Order {
         #[derive(serde::Serialize)]
         struct Request;
         impl crate::IntoDeleteRequest for Request {
-        const DOMAIN: &'static str = crate::trading::DOMAIN;
-        const ENDPOINT: &'static str = "/v2/orders";
-        type Response = ();
+            const DOMAIN: &'static str = crate::trading::DOMAIN;
+            const ENDPOINT: &'static str = "/v2/orders";
+            type Response = ();
             fn uri(&self) -> String {
                 format!("{}{}", Self::DOMAIN, Self::ENDPOINT)
             }
