@@ -46,9 +46,10 @@ impl<T: for<'a> serde::Deserialize<'a>> AlpacaRequest<T> {
     fn new(req: http::Request<String>) -> Self {
         Self(req,std::marker::PhantomData)
     }
-    pub async fn send<F, R>(self, func: F) -> Result<T, Box<dyn std::error::Error + Send + Sync>>
+    pub async fn send<F, R, E>(self, func: F) -> anyhow::Result<T>
     where F: Fn(http::Request<String>) -> R,
-        R: std::future::Future<Output = Result<bytes::Bytes, Box<dyn std::error::Error + Send + Sync>>>,
+        R: std::future::Future<Output = Result<bytes::Bytes, E>>,
+        E: std::error::Error + Send + Sync + 'static,
     {
         #[derive(serde::Deserialize)]
         #[serde(untagged)]
@@ -56,10 +57,10 @@ impl<T: for<'a> serde::Deserialize<'a>> AlpacaRequest<T> {
             Ok(T),
             Err(AlpacaError)
         }
-        let response = serde_json::from_slice::<AlpacaResponse<T>>(&func(self.0).await?)?;
+        let response: AlpacaResponse<T> = serde_json::from_slice(&func(self.0).await?)?;
         match response {
-                AlpacaResponse::Ok(data) => Ok(data),
-                AlpacaResponse::Err(err) => Err(Box::new(err))
+            AlpacaResponse::Ok(data) => Ok(data),
+            AlpacaResponse::Err(err) => Err(err.into())
         }
     }
 }
