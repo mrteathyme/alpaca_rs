@@ -1,4 +1,4 @@
-use http::status;
+use anyhow::Result;
 
 use crate::{AlpacaRequest, IntoDeleteRequest, IntoGetRequest, IntoPatchRequest, IntoPostRequest};
 #[derive(Copy, Clone, Debug)]
@@ -268,7 +268,7 @@ impl OrderBuilder {
 }
 
 impl Order {
-    pub fn get_order(key: &str, secret: &str, id: uuid::Uuid) -> Result<AlpacaRequest<Order>, Box<dyn std::error::Error>> {
+    pub fn get_order(key: &str, secret: &str, id: uuid::Uuid) -> Result<AlpacaRequest<Order>> {
         #[derive(serde::Serialize)]
         struct Request {
             id: uuid::Uuid,
@@ -283,7 +283,7 @@ impl Order {
         }
         Ok(Request { id }.as_request(key, secret)?)
     }
-    pub fn get_orders(key: &str, secret: &str,status: &str) -> Result<AlpacaRequest<Vec<Order>>, Box<dyn std::error::Error>> {
+    pub fn get_orders(key: &str, secret: &str,status: &str) -> Result<AlpacaRequest<Vec<Order>>> {
         #[derive(serde::Serialize)]
         struct Request {
             status: String,
@@ -298,7 +298,7 @@ impl Order {
         }
         Ok(Request { status: status.to_string() }.as_request(key,secret)?)
     }
-    pub fn create_order(&self, key: &str, secret: &str) -> Result<AlpacaRequest<Order>, Box<dyn std::error::Error>> {
+    pub fn create_order(&self, key: &str, secret: &str) -> Result<AlpacaRequest<Order>> {
         #[derive(serde::Serialize)]
         struct Request {
             symbol: String,
@@ -342,7 +342,7 @@ impl Order {
             position_intent: self.position_intent
         }.as_request(key,secret)?)
     }
-    pub fn replace_order(&self, key: &str, secret: &str, id: uuid::Uuid) -> Result<AlpacaRequest<Order>, Box<dyn std::error::Error>> {
+    pub fn replace_order(&self, key: &str, secret: &str, id: uuid::Uuid) -> Result<AlpacaRequest<Order>> {
         #[derive(serde::Serialize)]
         struct Request {
         id: uuid::Uuid,
@@ -381,7 +381,7 @@ impl Order {
         position_intent: self.position_intent
         }.as_request(key,secret)?)
     }
-    pub fn cancel_order(key: &str, secret: &str, id: uuid::Uuid) -> Result<AlpacaRequest<Order>, Box<dyn std::error::Error>> {
+    pub fn cancel_order(key: &str, secret: &str, id: uuid::Uuid) -> Result<AlpacaRequest<Order>> {
         #[derive(serde::Serialize)]
         struct Request {
         id: uuid::Uuid,
@@ -396,7 +396,7 @@ impl Order {
         }
         Ok(Request { id }.as_request(key,secret)?)
     }
-    pub fn cancel_orders(key: &str, secret: &str) -> Result<crate::AlpacaRequest<()>, Box<dyn std::error::Error>> {
+    pub fn cancel_orders(key: &str, secret: &str) -> Result<crate::AlpacaRequest<()>> {
         #[derive(serde::Serialize)]
         struct Request;
         impl crate::IntoDeleteRequest for Request {

@@ -2,6 +2,8 @@ pub mod broker;
 pub mod data;
 pub mod trading;
 
+use anyhow::Result;
+
 #[derive(Debug)]
 pub struct AlpacaError {
     code: i64,
@@ -74,7 +76,7 @@ trait IntoPostRequest: serde::Serialize {
         &self,
         key: &str,
         secret: &str,
-    ) -> Result<http::Request<String>, Box<dyn std::error::Error>> {
+    ) -> Result<http::Request<String>> {
         Ok(http::request::Builder::new()
             .method("POST")
             .header("APCA-API-KEY-ID", key)
@@ -86,7 +88,7 @@ trait IntoPostRequest: serde::Serialize {
         &self,
         key: &str,
         secret: &str,
-    ) -> Result<AlpacaRequest<Self::Response>, Box<dyn std::error::Error>> {
+    ) -> Result<AlpacaRequest<Self::Response>> {
         Ok(AlpacaRequest::new(self.as_post_request(key, secret)?))
     }
 }
@@ -100,7 +102,7 @@ trait IntoGetRequest: serde::Serialize {
         &self,
         key: &str,
         secret: &str,
-    ) -> Result<http::Request<String>, Box<dyn std::error::Error>> {
+    ) -> Result<http::Request<String>> {
         Ok(http::request::Builder::new()
             .method("GET")
             .header("APCA-API-KEY-ID", key)
@@ -112,7 +114,7 @@ trait IntoGetRequest: serde::Serialize {
         &self,
         key: &str,
         secret: &str,
-    ) -> Result<AlpacaRequest<Self::Response>, Box<dyn std::error::Error>> {
+    ) -> Result<AlpacaRequest<Self::Response>> {
         Ok(AlpacaRequest::new(self.as_get_request(key, secret)?))
     }
 }
@@ -126,7 +128,7 @@ trait IntoDeleteRequest: serde::Serialize {
         &self,
         key: &str,
         secret: &str,
-    ) -> Result<http::Request<String>, Box<dyn std::error::Error>> {
+    ) -> Result<http::Request<String>> {
         Ok(http::request::Builder::new()
             .method("DELETE")
             .header("APCA-API-KEY-ID", key)
@@ -138,7 +140,7 @@ trait IntoDeleteRequest: serde::Serialize {
         &self,
         key: &str,
         secret: &str,
-    ) -> Result<AlpacaRequest<Self::Response>, Box<dyn std::error::Error>> {
+    ) -> Result<AlpacaRequest<Self::Response>> {
         Ok(AlpacaRequest::new(self.as_delete_request(key, secret)?))
     }
 }
@@ -152,7 +154,7 @@ trait IntoPatchRequest: serde::Serialize {
         &self,
         key: &str,
         secret: &str,
-    ) -> Result<http::Request<String>, Box<dyn std::error::Error>> {
+    ) -> Result<http::Request<String>> {
         Ok(http::request::Builder::new()
             .method("PATCH")
             .header("APCA-API-KEY-ID", key)
@@ -164,7 +166,7 @@ trait IntoPatchRequest: serde::Serialize {
         &self,
         key: &str,
         secret: &str,
-    ) -> Result<AlpacaRequest<Self::Response>, Box<dyn std::error::Error>> {
+    ) -> Result<AlpacaRequest<Self::Response>> {
         Ok(AlpacaRequest::new(self.as_patch_request(key, secret)?))
     }
 }
