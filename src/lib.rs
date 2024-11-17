@@ -51,7 +51,7 @@ impl<T: for<'a> serde::Deserialize<'a>> AlpacaRequest<T> {
     pub async fn send<F, R, E>(self, func: F) -> anyhow::Result<T>
     where F: Fn(http::Request<String>) -> R,
         R: std::future::Future<Output = Result<bytes::Bytes, E>>,
-        E: std::error::Error + Send + Sync + 'static,
+        anyhow::Error: From<E>
     {
         #[derive(serde::Deserialize)]
         #[serde(untagged)]
