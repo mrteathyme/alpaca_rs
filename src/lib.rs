@@ -6,7 +6,7 @@ use anyhow::Result;
 
 #[derive(Debug)]
 pub struct AlpacaError {
-    code: i64,
+    code: Option<i64>,
     message: String,
     rest: std::collections::HashMap<String,serde_json::Value>
 }
@@ -17,8 +17,8 @@ impl<'a> serde::Deserialize<'a> for AlpacaError {
     {
         let all = serde_json::Value::deserialize(deserializer)?;
         let code = match all.get("code") {
-            Some(code) => code.as_i64().unwrap(),
-            None => return Err(serde::de::Error::missing_field("code"))
+            Some(code) => Some(code.as_i64().unwrap()),
+            None => None 
         };
         let message = match all.get("message") {
             Some(message) => message.as_str().unwrap().to_string(),
@@ -38,7 +38,11 @@ impl<'a> serde::Deserialize<'a> for AlpacaError {
 impl std::error::Error for AlpacaError {}
 impl std::fmt::Display for AlpacaError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "AlpacaError: {} ({}): {:#?}", self.message, self.code, self.rest)
+        let code = match self.code {
+            Some(code) => code.to_string(),
+            None => "N/A".to_string()
+        };
+        write!(f, "AlpacaError: {} ({}): {:#?}", self.message, code, self.rest)
     }
 }
 
