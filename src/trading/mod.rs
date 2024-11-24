@@ -1,7 +1,7 @@
 const DOMAIN: &str = "https://api.alpaca.markets";
 pub mod orders;
 pub mod accounts;
-
+pub mod positions;
 
 #[derive(serde::Serialize, serde::Deserialize, Copy, Clone, Debug)]
 pub enum AssetClass {

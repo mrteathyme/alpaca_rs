@@ -33,16 +33,6 @@ impl<'de> serde::Deserialize<'de> for ExtendedHours {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Copy, Clone, Debug)]
-pub enum AssetClass {
-    #[serde(rename = "us_equity")]
-    USEquity,
-    #[serde(rename = "us_option")]
-    UsOption,
-    #[serde(rename = "crypto")]
-    Crypto,
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Copy, Clone, Debug)]
 pub enum PositionIntent {
     #[serde(rename = "buy_to_open")]
     BuyToOpen,
@@ -174,7 +164,7 @@ pub struct Order {
     #[builder(setter(into))]
     pub symbol: String,
     #[builder(setter(into, strip_option),default)]
-    pub asset_class: Option<AssetClass>,
+    pub asset_class: Option<crate::trading::AssetClass>,
     
     #[serde_as(as = "Option<serde_with::DisplayFromStr>")]
     #[builder(setter(into, strip_option),default)]
