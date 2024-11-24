@@ -1,7 +1,7 @@
 use crate::{AlpacaRequest, IntoGetRequest};
 use serde::{Deserialize,Serialize};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 #[serde(untagged)]
 pub enum AccountStatus { //ToDo: Serde rename these takes like 20 seconds im just lazy af
     ONBOARDING,
@@ -13,7 +13,7 @@ pub enum AccountStatus { //ToDo: Serde rename these takes like 20 seconds im jus
     REJECTED
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Account {
     pub id: String,
     pub account_number: Option<String>,
