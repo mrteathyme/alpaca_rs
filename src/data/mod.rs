@@ -126,7 +126,7 @@ pub mod crypto {
         }
     }
 
-    pub fn historical_bars(key: &str, secret: &str, symbols: Vec<&str>, timeframe: Timeframe, start: Option<chrono::DateTime<chrono::Utc>>, end: Option<chrono::DateTime<chrono::Utc>>, limit: Option<i64>, page_token: Option<&str>, sort: Option<SortDirection>) -> anyhow::Result<crate::AlpacaRequest<HistoricalBars>> {
+    pub fn historical_bars(key: &str, secret: &str, symbols: Vec<&str>, timeframe: Timeframe, start: Option<chrono::DateTime<chrono::Utc>>, end: Option<chrono::DateTime<chrono::Utc>>, limit: Option<i64>, page_token: Option<&str>, sort: Option<SortDirection>) -> anyhow::Result<AlpacaRequest<HistoricalBars>> {
         #[derive(serde::Serialize)]
         pub struct Request<'a> {
             symbols: Vec<&'a str>,
@@ -180,73 +180,50 @@ pub mod crypto {
         }.as_request(key, secret)?)
     }
 
+    #[derive(serde::Deserialize, Debug, Clone)]
+    pub struct OrderPage {
+        #[serde(rename = "p")]
+        pub price: f64,
+        #[serde(rename = "s")]
+        pub size: f64,
+    }
 
-    pub mod latest_orderbook {
+    #[derive(serde::Deserialize, Debug, Clone)]
+    pub struct OrderBook {
+        #[serde(rename = "t")]
+        pub timestamp: chrono::DateTime<chrono::Utc>,
+        #[serde(rename = "b")]
+        pub bids: Vec<OrderPage>,
+        #[serde(rename = "a")]
+        pub asks: Vec<OrderPage>,
+    }
+    #[derive(serde::Deserialize, Debug, Clone)]
+    pub struct OrderBooks {
+        pub orderbooks: std::collections::HashMap<String,OrderBook>
+    }
+    pub fn latest_orderbook(key: &str, secret: &str, symbols: Vec<&str>) -> anyhow::Result<AlpacaRequest<OrderBooks>> {
         #[derive(serde::Serialize, Clone)]
         pub struct Request<'a> {
             pub symbols: Vec<&'a str>,
         }
-        impl<'a> Request<'a> {
-            pub fn new(symbols: Vec<&'a str>) -> Self {
-                Self {
-                    symbols,
-                }
-            }
-        }
-       
-        #[derive(serde::Deserialize, Debug, Clone)]
-        pub struct OrderPage {
-            #[serde(rename = "p")]
-            price: f64,
-            #[serde(rename = "s")]
-            size: f64,
-        }
 
-        #[derive(serde::Deserialize, Debug, Clone)]
-        pub struct OrderBook {
-            #[serde(rename = "t")]
-            timestamp: chrono::DateTime<chrono::Utc>,
-            #[serde(rename = "b")]
-            bids: Vec<OrderPage>,
-            #[serde(rename = "a")]
-            asks: Vec<OrderPage>,
-        }
-       
-        #[derive(serde::Deserialize, Debug, Clone)]
-        pub struct Response {
-            orderbooks: std::collections::HashMap<String, OrderBook>
-        }       
-        impl std::ops::Deref for Response {
-            type Target = std::collections::HashMap<String, OrderBook>;
-            fn deref(&self) -> &Self::Target {
-                &self.orderbooks
-            }
-        }
-
-        impl crate::IntoGetRequest for Request<'_> {
+        impl IntoGetRequest for Request<'_> {
             const DOMAIN: &'static str = crate::data::DOMAIN;
             const ENDPOINT: &'static str = "/v1beta3/crypto/us/latest/orderbooks";
-            type Response = Response;
+            type Response = OrderBooks;
             fn uri(&self) -> String {
                 let mut uri = format!("{}{}", Self::DOMAIN, Self::ENDPOINT);
                 if self.symbols.is_empty() { return uri; }
-                uri.push_str("?");
+                uri.push_str("?symbols=");
                 uri.push_str(&self.symbols.iter().fold(String::new(), |acc, symbol| {
-                    format!("{}{}&", acc, symbol)
+                    format!("{}{},", acc, symbol)
                 }));
                 uri
             }
-            /*
-            fn params_string(&self) -> String {
-                let mut params = self.symbols.iter().fold(String::new(), |acc, symbol| {
-                    format!("{}{},", acc, symbol)
-                });
-                if params.ends_with(",") {
-                    params.pop();
-                }
-                format!("?symbols={}", params)
-            }
-            */
         }
+
+        Ok(Request {
+            symbols,
+        }.as_request(key, secret)?)
     }
 }
